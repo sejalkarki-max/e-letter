@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Response to Your Invitation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        :root {
+            --cream: #f4f1e8;
+            --dark-cream: #e8e3d5;
+            --vintage-red: #8b4049;
+            --deep-burgundy: #5d2e32;
+            --sepia: #705c4e;
+            --ink: #2b2b2b;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, var(--dark-cream) 0%, var(--cream) 50%, #f8f6f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            opacity: 0;
+            animation: fadeInDown 1s ease-out forwards;
+        }
+
+        .header h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--vintage-red);
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--sepia);
+            font-style: italic;
+            letter-spacing: 1.5px;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            perspective: 1200px;
+            cursor: pointer;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.3s forwards;
+        }
+
+        .envelope {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #f5f0e1 0%, #e8dcc4 100%);
+            border-radius: 4px;
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            top: 0;
+            left: 0;
+            background: linear-gradient(to bottom, #f0e6d2 0%, #e8dcc4 100%);
+            transform-origin: top center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            z-index: 5;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transition: opacity 0.5s ease;
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, opacity 0.5s ease;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(139, 64, 73, 0.4));
+        }
+
+        .wax-seal::before {
+            content: '❤';
+            font-size: 2.5rem;
+            color: var(--vintage-red);
+            text-shadow: 
+                0 2px 4px rgba(0,0,0,0.2),
+                0 0 20px rgba(139, 64, 73, 0.3);
+        }
+
+        .envelope-wrapper:hover .wax-seal {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.95rem;
+            color: var(--sepia);
+            font-style: italic;
+            opacity: 0.7;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Letter Modal */
+        .letter-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            background: linear-gradient(to bottom, #fffef9 0%, #fefdf5 100%);
+            border: 1px solid rgba(139, 64, 73, 0.2);
+            border-radius: 8px;
+            padding: 60px 70px;
+            box-shadow: 
+                0 25px 80px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            overflow-y: auto;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .letter-modal.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .letter-modal::before {
+            content: none;
+        }
+
+        .letter-content::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: -30px;
+            right: -30px;
+            bottom: -30px;
+            border: 1px solid rgba(139, 64, 73, 0.15);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        .letter-content {
+            position: relative;
+            z-index: 1;
+            font-size: 1.15rem;
+            line-height: 2;
+            color: var(--ink);
+        }
+
+        .salutation {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--vintage-red);
+            margin-bottom: 40px;
+        }
+
+        .letter-body {
+            margin-bottom: 40px;
+        }
+
+        .letter-body p {
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+
+        .question-line {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--deep-burgundy);
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .signature {
+            margin-top: 50px;
+            text-align: right;
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--vintage-red);
+        }
+
+        .postscript {
+            margin-top: 30px;
+            font-size: 0.95rem;
+            font-style: italic;
+            color: var(--sepia);
+        }
+
+        .fold-hint {
+            margin-top: 40px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .fold-hint:hover {
+            opacity: 1;
+        }
+
+        .fold-text {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--sepia);
+            letter-spacing: 2px;
+        }
+
+        .fold-icon {
+            font-size: 0.8rem;
+            color: var(--vintage-red);
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        /* Waiting Message */
+        .waiting-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--dark-cream) 0%, var(--cream) 50%, #f8f6f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        .waiting-message.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .waiting-content {
+            text-align: center;
+        }
+
+        .waiting-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: var(--vintage-red);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInText 0.8s ease-out 0.3s forwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.7;
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInText {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 2.8rem;
+            }
+
+            .envelope-wrapper {
+                height: 280px;
+            }
+
+            .letter-modal {
+                padding: 40px 30px;
+                max-width: 95%;
+            }
+
+            .letter-content {
+                font-size: 1rem;
+            }
+
+            .salutation {
+                font-size: 2rem;
+            }
+
+            .question-line {
+                font-size: 1.8rem;
+            }
+
+            .signature {
+                font-size: 2.5rem;
+            }
+
+            .waiting-text {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RSVP, Pending</h1>
+            <p>With Warm Regards & Some Curiosity</p>
+        </div>
+
+        <div class="envelope-wrapper" onclick="openEnvelope()">
+            <div class="envelope">
+                <div class="envelope-back"></div>
+                <div class="envelope-flap" id="flap"></div>
+                <div class="wax-seal" id="seal"></div>
+            </div>
+            <div class="click-hint">Click the heart to open</div>
+        </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop" id="backdrop" onclick="closeLetter()"></div>
+
+    <!-- Letter Modal -->
+    <div class="letter-modal" id="letterModal">
+        <div class="letter-content">
+            <div class="salutation">Dear Mr. Bharat Rai,</div>
+            
+            <div class="letter-body">
+                <p>While I do appreciate you sending me an itinerary, I must say I'm a tad impressed by your prompt response, very gentlemanly of you.</p>
+                
+                <p>That said, I can't help but be intrigued by the timing of this particular engagement. February 14th, as you may be aware, comes with certain… implications. One might begin to wonder about the true nature of this "Personal Time Block."</p>
+                
+                <p>So, given the rather well-chosen date, I feel compelled to ask with the utmost directness:</p>
+            </div>
+
+            <div class="question-line">
+                Please clearly express your true intentions?
+            </div>
+
+            <div class="signature">~ Sejal Karki</div>
+
+            <div class="postscript">
+                P.S. Are we acknowledging what this looks like, or shall we agree to pretend it's purely operational?
+            </div>
+
+            <div class="fold-hint" onclick="closeLetter(event)">
+                <span class="fold-text">Fold</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Waiting Message -->
+    <div class="waiting-message" id="waitingMessage">
+        <div class="waiting-content">
+            <p class="waiting-text">Let me know which story we're going with ;)</p>
+        </div>
+    </div>
+
+    <script>
+        let envelopeOpened = false;
+
+        function openEnvelope() {
+            if (!envelopeOpened) {
+                envelopeOpened = true;
+                
+                // Hide envelope elements
+                document.getElementById('flap').style.opacity = '0';
+                document.getElementById('seal').style.opacity = '0';
+                
+                // Show backdrop and letter modal
+                setTimeout(() => {
+                    document.getElementById('backdrop').classList.add('active');
+                    document.getElementById('letterModal').classList.add('active');
+                }, 300);
+            }
+        }
+
+        function closeLetter(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            // Fade out letter modal with scale animation
+            const letterModal = document.getElementById('letterModal');
+            const backdrop = document.getElementById('backdrop');
+            
+            letterModal.style.transition = 'all 0.5s ease-out';
+            letterModal.style.opacity = '0';
+            letterModal.style.transform = 'translate(-50%, -50%) scale(0.95)';
+            
+            // Remove active classes after fade
+            setTimeout(() => {
+                backdrop.classList.remove('active');
+                letterModal.classList.remove('active');
+                // Reset for next open
+                letterModal.style.transform = '';
+                letterModal.style.opacity = '';
+            }, 500);
+            
+            // Show waiting message with longer delay for smoother transition
+            setTimeout(() => {
+                document.getElementById('waitingMessage').classList.add('active');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
